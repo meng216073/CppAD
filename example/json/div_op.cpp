@@ -12,10 +12,11 @@ in the Eclipse Public License, Version 2.0 are satisfied:
 /*
 $begin json_div_op.cpp$$
 $spell
+    div
     Json
 $$
 
-$section Using The Json Division Operator: Example and Test$$
+$section Json div Operator: Example and Test$$
 
 $head Source Code$$
 $srcfile%example/json/div_op.cpp%0%// BEGIN C++%// END C++%1%$$
@@ -41,29 +42,29 @@ bool div_op(void)
     // y[0]   = p[0] / p[1]
     // y[1]   = x[0] / ( p[0] / p[1] )
     // use single quote to avoid having to escape double quote
-    std::string graph =
+    std::string json =
         "{\n"
         "   'function_name'  : 'div example',\n"
         "   'op_define_vec'  : [ 1, [\n"
         "       { 'op_code':1, 'name':'div', 'n_arg':2 } ]\n"
         "   ],\n"
         "   'n_dynamic_ind'  : 2,\n"
-        "   'n_independent'  : 1,\n"
-        "   'string_vec'     : 0, [ ],\n"
-        "   'constant_vec'   : 0, [ ],\n"
-        "   'op_usage_vec'   : 2, [\n"
+        "   'n_variable_ind' : 1,\n"
+        "   'constant_vec'   : [ 0, [ ] ],\n"
+        "   'op_usage_vec'   : [ 2, [\n"
         "       [ 1, 1, 2 ] ,\n" // p[0] / p[1]
         "       [ 1, 3, 4 ] ]\n" // x[0] / ( p[0] / p[1] )
-        "   ,\n"
-        "   'dependent_vec' : 2, [4, 5]\n"
+        "   ],\n"
+        "   'dependent_vec' : [ 2, [4, 5] ] \n"
         "}\n";
     // Convert the single quote to double quote
-    for(size_t i = 0; i < graph.size(); ++i)
-        if( graph[i] == '\'' ) graph[i] = '"';
+    for(size_t i = 0; i < json.size(); ++i)
+        if( json[i] == '\'' ) json[i] = '"';
     //
     // f(x, p) = [ p_0 / p_1 , x_0 * p_1 / p_0 ]
     CppAD::ADFun<double> f;
-    f.from_json(graph);
+    f.from_json(json);
+    //
     ok &= f.Domain() == 1;
     ok &= f.Range() == 2;
     ok &= f.size_dyn_ind() == 2;
@@ -77,6 +78,28 @@ bool div_op(void)
     // compute y = f(x, p)
     f.new_dynamic(p);
     vector<double> y = f.Forward(0, x);
+    //
+    // check result
+    ok &= NearEqual(y[0] , p[0] / p[1] , eps99, eps99 );
+    ok &= NearEqual(y[1] , x[0] / ( p[0] / p[1] ), eps99, eps99 );
+    // -----------------------------------------------------------------------
+    // Convert to Json graph and back again
+    json = f.to_json();
+    // std::cout << "json = " << json;
+    f.from_json(json);
+    // -----------------------------------------------------------------------
+    ok &= f.Domain() == 1;
+    ok &= f.Range() == 2;
+    ok &= f.size_dyn_ind() == 2;
+    //
+    // set independent variables and parameters
+    p[0] = 2.0;
+    p[1] = 3.0;
+    x[0] = 4.0;
+    //
+    // compute y = f(x, p)
+    f.new_dynamic(p);
+    y = f.Forward(0, x);
     //
     // check result
     ok &= NearEqual(y[0] , p[0] / p[1] , eps99, eps99 );

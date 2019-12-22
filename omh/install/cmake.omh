@@ -105,6 +105,20 @@ in font the command.
 It is suggested that you should start with the simple version of the
 cmake command above and then add options one at a time.
 
+$subhead Warning$$
+Version 3.10.2 of cmake will generates the following warning if boost
+is not present your system:
+$codei%
+CMake Warning at /usr/share/cmake-3.10/Modules/FindBoost.cmake:567 (message):
+  Imported targets and dependency information not available for Boost version
+  (all versions older than 1.33)
+  %...%
+%$$
+This is not a problem because CppAD will automatically exclude the
+examples and tests that use boost.
+Newer version of cmake; e.g., 3.13.4, do not generate this warning
+(when boost is not present on your system).
+
 $subhead Options$$
 The full version of the command, with all its optional arguments is:
 $codei%
@@ -130,13 +144,11 @@ cmake %%                                                                     \
     \
     -D cppad_cxx_flags=%cppad_cxx_flags%                                     \
     -D cppad_profile_flag=%cppad_profile_flag%                               \
-    \
     -D cppad_testvector=%cppad_testvector%                                   \
     -D cppad_max_num_threads=%cppad_max_num_threads%                         \
     -D cppad_tape_id_type=%cppad_tape_id_type%                               \
     -D cppad_tape_addr_type=%cppad_tape_addr_type%                           \
     -D cppad_debug_which=%cppad_debug_which%                                 \
-    -D cppad_deprecated=%cppad_deprecated%                                   \
     \
     ..
 %$$
@@ -251,7 +263,10 @@ the file $code cppad.hpp$$ is installed in the location
 $codei%
     /usr/include/cppad/cppad.hpp
 %$$
-The default value for $icode cppad_prefix$$ is $code /usr$$.
+The default value for $icode cppad_prefix$$ is the value of
+$icode CMAKE_INSTALL_PREFIX$$; see the cmake documentation.
+(Before 2019-10-02 the default value was $code /usr$$; see
+the heading 10-02 on $cref/whats_new_19/whats_new_19/10-02/$$.)
 
 $head cppad_postfix$$
 This is the bottom level relative path below which
@@ -395,8 +410,6 @@ $subhead Eigen and Fadbad$$
 The packages
 $cref/eigen/eigen_prefix/$$ and $cref/fadbad/fadbad_prefix/$$
 currently generate a lot of shadowed variable warnings.
-If the $code -Wshadow$$ flag is present, it is automatically removed when
-compiling examples and test that use these packages.
 
 $head cppad_testvector$$
 See $tref cppad_testvector$$.
@@ -478,10 +491,6 @@ If it is $code debug_all$$ ($code debug_none$$),
 all the files will be compiled in debug (release) mode.
 If $icode cppad_debug_which$$ does not appear on the command line,
 the default value $code debug_all$$ is used.
-
-$head cppad_deprecated$$
-The default value for $icode cppad_deprecated$$ is $code NO$$
-(the value $code YES$$ is not currently being used).
 
 $children%
     omh/install/adolc_prefix.omh%

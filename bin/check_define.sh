@@ -1,6 +1,6 @@
 #! /bin/bash -e
 # -----------------------------------------------------------------------------
-# CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
+# CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
 #
 # CppAD is distributed under the terms of the
 #              Eclipse Public License Version 2.0.
@@ -15,14 +15,6 @@ then
     echo 'bin/check_define.sh: must be executed from its parent directory'
     exit 1
 fi
-for temp_file in check_define.1 check_define.2 check_define.3
-do
-    if [ -e $temp_file ]
-    then
-        echo "bin/check_define.sh: $temp_file exists"
-        exit 0
-    fi
-done
 # -----------------------------------------------------------------------------
 echo 'Check '# define' versus '# undef' names and check for addon names'
 echo '-----------------------------------------------------------------------'
@@ -53,7 +45,9 @@ do
         # undef
         if [ ! -e $file.in ]
         then
+            # note <cppad/local/utility/cppad_vector_itr.hpp> is special
             sed -n -e "/^# *undef /p" $file | sed \
+                -e '/CPPAD_LOCAL_UTILITY_CPPAD_VECTOR_ITR_HPP/d' \
                 -e "s/^# *undef  *\([A-Za-z0-9_]*\).*/\1/" >> check_define.2
         fi
         # add_on

@@ -27,15 +27,20 @@ in the Eclipse Public License, Version 2.0 are satisfied:
 
 // BEGIN_SORT_THIS_LINE_PLUS_2
 // external compiled tests
-extern bool from_json(void);
 extern bool add_op(void);
 extern bool atom_op(void);
+extern bool azmul_op(void);
+extern bool cexp_op(void);
+extern bool comp_op(void);
 extern bool div_op(void);
+extern bool from_json(void);
 extern bool mul_op(void);
+extern bool pow_op(void);
 extern bool sparse(void);
 extern bool sub_op(void);
 extern bool sum_op(void);
 extern bool to_json(void);
+extern bool unary_op(void);
 // END_SORT_THIS_LINE_MINUS_1
 
 // main program that runs all the tests
@@ -48,15 +53,20 @@ int main(void)
 
     // BEGIN_SORT_THIS_LINE_PLUS_2
     // external compiled tests
-    Run( from_json,            "from_json"       );
     Run( add_op,               "add_op"          );
     Run( atom_op,              "atom_op"         );
+    Run( azmul_op,             "azmul_op"        );
+    Run( cexp_op,              "cexp_op"         );
+    Run( comp_op,              "comp_op"         );
     Run( div_op,               "div_op"          );
+    Run( from_json,            "from_json"       );
     Run( mul_op,               "mul_op"          );
+    Run( pow_op,               "pow_op"          );
     Run( sparse,               "sparse"          );
     Run( sub_op,               "sub_op"          );
     Run( sum_op,               "sum_op"          );
     Run( to_json,              "to_json"         );
+    Run( unary_op,             "unary_op"        );
     // END_SORT_THIS_LINE_MINUS_1
 
     // check for memory leak

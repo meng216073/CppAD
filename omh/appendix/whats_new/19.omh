@@ -12,6 +12,7 @@ CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
 
 $begin whats_new_19$$
 $spell
+    messaging
     CppAD
     LeppOp
     dag
@@ -40,9 +41,247 @@ $spell
     taylor
     div
     enum
+    Iterators
+    arg
+    autotools
+    omhelp
+    Goto
+    usr
+    ind
+    uninitialized
+    dyn
+    azmul
 $$
 
 $section Changes and Additions to CppAD During 2019$$
+
+$head 12-21$$
+Add an
+$cref/atomic functions/wish_list/Abs-normal/Atomic Functions/$$ item
+to the wish list for abs-normal functions.
+
+$head 12-20$$
+Add a
+$cref/dynamic parameters/wish_list/Dynamic Parameters/$$ item and a
+$cref/Graph Operators/wish_list/Graph Operators/$$ item to the wish list.
+
+$head 12-18$$
+$list number$$
+The $cref graph_atom_op.cpp$$ $icode Base$$ type was changed from
+$code double$$ to $code float$$.
+$lnext
+Fix a bug in
+$cref from_graph$$, $cref from_json$$, $cref to_graph$$, and $cref to_json$$
+when the $cref/Base/from_json/Base/$$ type is not $code double$$.
+$lend
+
+
+$head 12-16$$
+Add more description in the comments for the
+$cref/graph_op_enum values/graph_op_enum/Enum Values/$$.
+
+$head 12-15$$
+$list number$$
+Added a list of the possible $cref ADFun$$ operators
+that are $cref/missing/graph_op_enum/Missing Operators/$$
+(not yet implemented) by $cref to_graph$$ and $cref to_json$$.
+$lnext
+Absolute zero multiplication
+$cref/azmul/json_graph_op/Binary Operators/azmul/$$
+was as added to the $cref json_ad_graph$$ and
+$cref cpp_ad_graph$$ as $code pow_graph_op$$.
+Functions that contain the this operator
+can be converted to and from $code cpp_graph$$ objects; e.g.,
+see $cref graph_azmul_op.cpp$$.
+They can also be converted to and from strings containing
+$cref json_ad_graph$$ representations; e.g.,
+see $cref json_azmul_op.cpp$$.
+$lnext
+Improve the
+$cref/graph_op_enum examples/graph_op_enum/Examples/$$ by removing
+some type definitions and using statements.
+In addition, use $cref cppad_testvector$$ to demonstrate that
+any $cref simplevector$$ type can be used.
+$lend
+
+$head 12-14$$
+The power operators was added to the $cref json_ad_graph$$ as
+$cref/pow/json_graph_op/Binary Operators/pow/$$ and to the
+$cref cpp_ad_graph$$ as $code pow_graph_op$$; see
+$cref/enum values/graph_op_enum/Enum Values/$$.
+Functions that contain the $cref pow$$ operators
+can be converted to and from $code cpp_graph$$ objects; e.g.,
+see $cref graph_pow_op.cpp$$.
+They can also be converted to and from strings containing
+$cref json_ad_graph$$ representations; e.g.,
+see $cref json_pow_op.cpp$$.
+
+$head 12-13$$
+Add $cref switch_var_dyn.cpp$$, an example that
+switches between variables and dynamic parameters.
+
+$head 12-12$$
+Add a version of the $code from_graph$$ routine that
+can convert dynamic parameters to variables and vice versa; see
+$cref/dyn2var/from_graph/dyn2var/$$ and $icode var2dyn$$ in the
+$code from_graph$$ documentation.
+
+$head 12-09$$
+Add the $codei%Independent(%x%, %dynamic%)%$$ syntax
+to the $cref Independent$$ function and changes some of the
+$cref new_dynamic$$ example to use this syntax.
+
+$head 12-08$$
+Add wish list item for converting dynamic parameters to variables
+and vice versa. This has since been completed;
+see $cref/12-12/whats_new_19/12-12/$$ above.
+
+$head 11-15$$
+Fix clang 9.0.0 mistaken uninitialized warning in
+$cref a11c_openmp.cpp$$.
+
+$head 11-10$$
+Change $icode n_independent$$ to $icode n_variable_ind$$ in
+$cref/json_ad_graph/json_ad_graph/variable_ind_vec/n_variable_ind/$$ and
+$cref/cpp_ad_graph/cpp_ad_graph/n_variable_ind/$$.
+In addition, the under construction warning was removed from
+$cref json_ad_graph$$ and $cref cpp_ad_graph$$.
+
+$head 11-09$$
+The C++ data structure for an AD graph $cref/cpp_graph/cpp_ad_graph/cpp_graph/$$
+was add the user API for CppAD.
+
+$head 11-05$$
+More work on reducing the amount of memory used by the
+$cref from_json$$ and $cref to_json$$ operations.
+
+$head 10-28$$
+More work on reducing the amount of memory used by the
+$cref from_json$$ and $cref to_json$$ operations.
+
+$head 10-27$$
+$list number$$
+Working on reducing the amount of memory used by the
+$cref from_json$$ and $cref to_json$$ operations.
+$lnext
+Improve sparse jacobian error messaging when coloring is
+$cref/cppad/sparse_jac/coloring/cppad/$$ and
+$cref/subset/sparse_jac/subset/$$
+has elements that are not in the sparsity
+$cref/pattern/sparse_jac/pattern/$$.
+$lend
+
+$head 10-22$$
+A left (right) bracket was added to the beginning of (end of) the
+$cref/constant_vec/json_ad_graph/constant_vec/$$,
+$cref/op_usage_vec/json_ad_graph/op_usage_vec/$$,
+$cref/dependent_vec/json_ad_graph/dependent_vec/$$ values
+in a Json AD graph (to properly conform to Json format).
+
+
+$head 10-21$$
+Move the Json AD graph discussion of
+$cref/node indices/json_ad_graph/Node Indices/$$
+under one heading and include
+a diagram of all the nodes.
+
+$head 10-17$$
+Include conversion from function to graph ($cref to_json$$)
+and back to function ($cref from_json$$)
+in the $cref/json operator/json_graph_op/$$ examples.
+
+$head 10-02$$
+The default value for $cref/cppad_prefix/cmake/cppad_prefix/$$
+was changed from $code /usr$$ to the value of the cmake variable
+$href%
+    https://cmake.org/cmake/help/v3.0/variable/CMAKE_INSTALL_PREFIX.html%
+    CMAKE_INSTALL_PREFIX
+%$$.
+
+$head 09-30$$
+Use a newer version of the program that generates the documentation
+$code omhelp$$.
+The $cref _search$$ utility now shows the title and section tag in separate
+areas and hides the other keywords.
+Hitting return or double clicking in the title area,
+in addition to choosing the $code Goto$$ button, will go to
+the selected section.
+
+$head 09-24$$
+Discussion of a $cref/warning/cmake/CMake Command/Warning/$$
+about boost as added to cmake command documentation.
+
+$head 09-23$$
+The $code cppad_deprecated$$ option has been completely removed from the
+cmake command $cref/options/cmake/CMake Command/Options/$$ documentation.
+
+$head 09-18$$
+Merge in changes from json branch which implement the
+$cref/compare operators/json_graph_op/Compare Operators/$$.
+
+$head 09-17$$
+The autotools install was installing $icode%*%.hpp.in%$$
+instead of the corresponding $icode%*%.hpp%$$ file.
+This has been fixed.
+
+$head 09-14$$
+Fix autotools install so files get installed to
+$icode%prefix%/include/cppad%$$ instead of
+$icode%prefix%/include/include/cppad%$$.
+Also fix the autotools $code make test$$.
+
+$head 09-12$$
+Bring $cref autotools$$ build and test up to date
+(this was deprecated at end of 2012 and support for this will eventually stop).
+
+$head 09-10$$
+The old Json unary operator examples were converted to be just
+tests and a single $cref json_unary_op.cpp$$ example was left
+in its place.
+
+$head 09-09$$
+The Json graph
+$cref/conditional expressions/json_graph_op/Conditional Expressions/$$
+were added.
+
+$head 08-29$$
+$list number$$
+Extend $cref to_json$$ to handle
+$cref/atomic functions/json_graph_op/Atomic Functions/$$.
+This should have been included with the atomic function change
+on $cref/08-17/whats_new_19/08-17/$$.
+$lnext
+Simplify the $cref json_atom_op.cpp$$ and add a call
+to $cref to_json$$ to this example.
+$lnext
+The $code string_vec$$ field was removed from the definition of an
+Json AD graph $cref/function/json_ad_graph/AD Graph/function/$$.
+The corresponding operators will have strings in their
+$cref/op_usage
+    /json_ad_graph
+    /op_usage
+    /Strings In Usage
+/$$.
+
+$lnext
+The vector branch was merged into the master.
+This brought in the following changes from 08-22 to 08-26 below.
+$lend
+
+$subhead 08-25$$
+Change $cref cppad_vector.cpp$$ example to use same names as
+in $cref CppAD_vector$$ documentation.
+
+$subhead 08-23$$
+The $cref CppAD_vector$$ documentation page was edited (improved).
+
+$subhead 08-22$$
+$cref/Iterators/CppAD_vector/Iterators/$$ were added
+to the CppAD vector class.
+
+$head 08-26$$
+The Json graph
+$cref/unary operators/json_graph_op/Unary Operators/$$ were added.
 
 $head 08-19$$
 The CppAD vector
@@ -54,7 +293,8 @@ $head 08-17$$
 $list number$$
 Add a the Json addition example $cref json_add_op.cpp$$.
 $lnext
-Add the $cref/atom/json_op_define/atom/$$ operator which enables
+Add the $cref/atomic function/json_graph_op/Atomic Functions/$$
+operator which enables
 one to call atomic functions as part of a Json AD graph; see the
 $cref json_atom_op.cpp$$ example.
 $lend
@@ -73,7 +313,7 @@ when using $cref chkpoint_two$$ function.
 $head 08-12$$
 $list number$$
 Fix an assert error for the
-$cref/sum/json_op_define/sum/$$ operator
+$cref/sum/json_graph_op/sum/$$ operator
 in $cref from_json$$.
 $lnext
 Improve the documentation for mixing debug and release versions
@@ -92,7 +332,7 @@ Remove under construction heading from the examples
 $cref json_mul_op.cpp$$, $cref json_sub_op.cpp$$, $cref json_sum_op.cpp$$
 (they have been working for a while now).
 $lnext
-Add the Json $cref/div/json_op_define/div/$$ operator.
+Add the Json $cref/div/json_graph_op/Binary Operators/div/$$ operator.
 $lend
 
 $head 08-09$$
@@ -125,12 +365,13 @@ to the documentation for $icode taylor_x$$ in the
 $cref/forward/atomic_three_forward/taylor_x/parameters/$$ and
 $cref/reverse/atomic_three_forward/taylor_x/parameters/$$ callback functions.
 $lnext
-Change Json $cref/string_vec/json_ad_graph/string_vec/$$
+Change Json $icode string_vec$$
 from first to second line below:
 $codei%
     [ %n_string%, [ %first_string%, %...%, %last_string% ] ]
     %n_string%, [ %first_string%, %...%, %last_string% ]
 %$$
+($icode string_vec$$ was removed on $cref/08-29/whats_new_19/08-29/$$).
 $lnext
 Change Json $cref/constant_vec/json_ad_graph/constant_vec/$$
 from first to second line below:
@@ -173,7 +414,7 @@ $cref json_ad_graph$$; see $cref json_sparse.cpp$$.
 $head 07-30$$
 $list number$$
 Add the json subtraction operator
-$cref/sub/json_op_define/sub/$$.
+$cref/sub/json_graph_op/Binary Operators/sub/$$.
 $lnext
 Fix $cref from_json$$ addition and multiply operations
 where the first argument is a variable and second argument is a parameter.
@@ -189,7 +430,7 @@ $lend
 $head 07-29$$
 Add the $cref json_sum_op.cpp$$ example and fix a bug in
 $cref from_json$$ that was demonstrated by this example.
-To be specific, the json $cref/sum/json_op_define/sum/$$ operator
+To be specific, the json $cref/sum/json_graph_op/sum/$$ operator
 did not work when all its result was a
 $cref/dynamic parameter/glossary/Parameter/Dynamic/$$.
 

@@ -48,7 +48,9 @@ $childtable%
 
 $end
 */
+# include <cppad/core/graph/cpp_graph.hpp>
 # include <cppad/local/subgraph/info.hpp>
+# include <cppad/local/graph/cpp_graph_op.hpp>
 
 namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 /*!
@@ -303,11 +305,18 @@ public:
     void operator=(ADFun&& f);
 # endif
 
-    // create from Json AD graph
-    void from_json(const std::string& graph);
+    // create from Json or C++ AD graph
+    void from_json(const std::string& json);
+    void from_graph(const cpp_graph& graph_obj);
+    void from_graph(
+        const cpp_graph&    graph_obj  ,
+        const vector<bool>& dyn2var    ,
+        const vector<bool>& var2dyn
+    );
 
-    // create a Json AD graph
+    // create a Json or C++ AD graph
     std::string to_json(void);
+    void to_graph(cpp_graph& graph_obj);
 
     // create ADFun< AD<Base> > from this ADFun<Base>
     // (doxygen in cppad/core/base2ad.hpp)
@@ -339,10 +348,10 @@ public:
     template <class BaseVector>
     BaseVector Forward(size_t q, size_t r, const BaseVector& x);
 
-    /// forward mode user API, multiple directions one order.
+    /// forward mode user API, multiple orders one direction.
     template <class BaseVector>
-    BaseVector Forward(size_t q,
-        const BaseVector& x, std::ostream& s = std::cout
+    BaseVector Forward(
+        size_t q, const BaseVector& xq, std::ostream& s = std::cout
     );
 
     /// reverse mode sweep
@@ -838,10 +847,12 @@ public:
 # include <cppad/local/sweep/rev_jac.hpp>
 # include <cppad/local/sweep/rev_hes.hpp>
 # include <cppad/local/sweep/for_hes.hpp>
+# include <cppad/core/graph/from_graph.hpp>
+# include <cppad/core/graph/to_graph.hpp>
 
 // user interfaces
 # include <cppad/core/parallel_ad.hpp>
-# include <cppad/core/independent.hpp>
+# include <cppad/core/independent/independent.hpp>
 # include <cppad/core/dependent.hpp>
 # include <cppad/core/fun_construct.hpp>
 # include <cppad/core/base2ad.hpp>
@@ -852,7 +863,7 @@ public:
 # include <cppad/core/omp_max_thread.hpp>
 # include <cppad/core/optimize.hpp>
 # include <cppad/core/abs_normal_fun.hpp>
-# include <cppad/core/json/from_json.hpp>
-# include <cppad/core/json/to_json.hpp>
+# include <cppad/core/graph/from_json.hpp>
+# include <cppad/core/graph/to_json.hpp>
 
 # endif

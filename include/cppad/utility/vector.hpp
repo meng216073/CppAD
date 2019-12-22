@@ -19,6 +19,13 @@ in the Eclipse Public License, Version 2.0 are satisfied:
 # include <cppad/utility/check_simple_vector.hpp>
 # include <cppad/utility/thread_alloc.hpp>
 
+// Note that CPPAD_CONST is undefined by cppad_vector_itr.hpp
+# define CPPAD_CONST 0
+# include <cppad/local/utility/cppad_vector_itr.hpp>
+# undef  CPPAD_LOCAL_UTILITY_CPPAD_VECTOR_ITR_HPP
+# define CPPAD_CONST 1
+# include <cppad/local/utility/cppad_vector_itr.hpp>
+
 namespace CppAD { // BEGIN_CPPAD_NAMESPACE
 
 // ==========================================================================
@@ -30,7 +37,7 @@ $spell
     vec
 $$
 
-$section Vector Class: Member Data $$
+$section Vector Class: Member Data$$
 
 $head Syntax$$
 $icode%vec%.capacity()
@@ -61,28 +68,39 @@ private:
     size_t length_;
     Type*  data_;
 public:
-    size_t capacity(void) const
+    size_t capacity(void) const CPPAD_NOEXCEPT
     {   return capacity_; }
-    size_t size(void) const
+    size_t size(void) const CPPAD_NOEXCEPT
     {   return length_; }
-    const Type* data(void) const
+    const Type* data(void) const CPPAD_NOEXCEPT
     {   return data_; }
-    Type* data(void)
+    Type* data(void) CPPAD_NOEXCEPT
     {   return data_; }
 /* %$$
 $end
 -----------------------------------------------------------------------------
 $begin cppad_vector_typedef$$
+$spell
+    const_iterator
+$$
 
 $section Vector Class: Type Definitions$$
 
 $head value_type$$
-Type corresponding to an element of the vector.
+type corresponding to an element of a vector.
 
-$head Source$$
+$head iterator$$
+type corresponding to an iterator for a vector.
+
+$head const_iterator$$
+type corresponding to an iterator for a vector when
+the vector is $code const$$.
+
 $srccode%hpp% */
 public:
-    typedef Type value_type;
+    typedef Type                                         value_type;
+    typedef local::utility::cppad_vector_itr<Type>       iterator;
+    typedef local::utility::const_cppad_vector_itr<Type> const_iterator;
 /* %$$
 $end
 -----------------------------------------------------------------------------
@@ -124,7 +142,8 @@ Call destructor and free all the allocated elements
 $head Source$$
 $srccode%hpp% */
 public:
-    vector(void) : capacity_(0), length_(0), data_(CPPAD_NULL)
+    vector(void) CPPAD_NOEXCEPT
+    : capacity_(0), length_(0), data_(CPPAD_NULL)
     { }
     vector(size_t n) : capacity_(0), length_(0), data_(CPPAD_NULL)
     {   resize(n); }
@@ -236,7 +255,7 @@ Swaps $code length_$$, $code capacity_$$ and $code data_$$
 between $icode vec$$ and $icode other$$.
 
 $head Assignment$$
-see $cref/user API assignment/cppad_vector/Assignment/$$
+see $cref/user API assignment/CppAD_vector/Assignment/$$
 
 $head Move Semantics$$
 If $code CPPAD_USE_CPLUSPLUS_2011$$ is $code 1$$
@@ -248,7 +267,7 @@ $end
 */
 // BEGIN_SWAP
 public:
-    void swap(vector& other)
+    void swap(vector& other) CPPAD_NOEXCEPT
 // END_SWAP
     {  // special case where vec and other are the same vector
        if( this == &other )
@@ -274,7 +293,9 @@ public:
     }
 # if CPPAD_USE_CPLUSPLUS_2011
 // BEGIN_MOVE_SEMANTICS
-    vector& operator=(vector&& other)
+    // move semantics should not do any allocation
+    // hence when NDEBUG is define this should not throw an exception
+    vector& operator=(vector&& other) CPPAD_NDEBUG_NOEXCEPT
 // END_MOVE_SEMANTICS
     {   CPPAD_ASSERT_KNOWN(
             length_ == other.length_ || (length_ == 0),
@@ -419,6 +440,42 @@ $end
         // swap old and new vectors
         swap(vec);
     }
+/*
+------------------------------------------------------------------------------
+$begin cppad_vector_itr_fun$$
+$spell
+    vec
+    iterator
+$$
+
+$section Vector Class: Iterator Functions$$
+
+$head Syntax$$
+$icode%os%vec%.begin()
+%$$
+$icode%os%vec%.end()
+%$$
+
+$head Source$$
+$srccode%hpp% */
+    const_iterator begin(void) const CPPAD_NOEXCEPT
+    {    return const_iterator(&data_, &length_, 0); }
+    const_iterator end(void) const CPPAD_NOEXCEPT
+    {   typedef typename const_iterator::difference_type difference_type;
+        difference_type index = static_cast<difference_type>(length_);
+        return const_iterator(&data_, &length_, index);
+    }
+    //
+    iterator begin(void) CPPAD_NOEXCEPT
+    {    return iterator(&data_, &length_, 0); }
+    iterator end(void) CPPAD_NOEXCEPT
+    {   typedef typename iterator::difference_type difference_type;
+        difference_type index = static_cast<difference_type>(length_);
+        return iterator(&data_, &length_, index);
+    }
+/* %$$
+$end
+*/
 
 // =========================================================================
 };  // END_TEMPLATE_CLASS_VECTOR

@@ -28,9 +28,11 @@ ignore_files='
     bin/get_highlight.sh
     bin/get_omhelp.sh
     bin/run_omhelp.sh
+    cmake/cppad_uninstall.cmake
     coin.png
     COPYING
     compile
+    configure
     config.guess
     config.sub
     configure

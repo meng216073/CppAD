@@ -16,7 +16,7 @@ $spell
     Json
 $$
 
-$section Using Json to Represent a Sparse Matrix: Example and Test$$
+$section Json Representation of a Sparse Matrix: Example and Test$$
 
 $head Discussion$$
 The example using a CppAD Json to represent the sparse matrix
@@ -57,29 +57,28 @@ bool sparse(void)
     // y[1]   = p[1] * x[1]
     // y[2]   = c[0] * x[0]
     // use single quote to avoid having to escape double quote
-    std::string graph =
+    std::string json =
         "{\n"
         "   'function_name'  : 'sparse example',\n"
         "   'op_define_vec'  : [ 1, [\n"
         "       { 'op_code':1, 'name':'mul', 'n_arg':2 } ]\n"
         "   ],\n"
         "   'n_dynamic_ind'  : 2,\n"
-        "   'n_independent'  : 3,\n"
-        "   'string_vec'     : 0, [ ],\n"
-        "   'constant_vec'   : 1, [ 3.0 ],\n"
-        "   'op_usage_vec'   : 3, [\n"
+        "   'n_variable_ind' : 3,\n"
+        "   'constant_vec'   : [ 1, [ 3.0 ] ],\n"
+        "   'op_usage_vec'   : [ 3, [\n"
         "       [ 1, 1, 3 ] , \n"
         "       [ 1, 2, 4 ] , \n"
         "       [ 1, 6, 5 ] ] \n"
-        "   ,\n"
-        "   'dependent_vec'   : 3, [7, 8, 9]\n"
+        "   ],\n"
+        "   'dependent_vec'   : [ 3, [7, 8, 9] ] \n"
         "}\n";
     // Convert the single quote to double quote
-    for(size_t i = 0; i < graph.size(); ++i)
-        if( graph[i] == '\'' ) graph[i] = '"';
+    for(size_t i = 0; i < json.size(); ++i)
+        if( json[i] == '\'' ) json[i] = '"';
     //
     CppAD::ADFun<double> fun;
-    fun.from_json(graph);
+    fun.from_json(json);
     ok &= fun.Domain() == 3;
     ok &= fun.Range()  == 3;
     ok &= fun.size_dyn_ind() == 2;

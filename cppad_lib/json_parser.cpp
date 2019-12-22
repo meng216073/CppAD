@@ -10,61 +10,42 @@ in the Eclipse Public License, Version 2.0 are satisfied:
       GNU General Public License, Version 2.0 or later.
 ---------------------------------------------------------------------------- */
 
-# include <cppad/local/json/parser.hpp>
-# include <cppad/local/json/lexer.hpp>
+
+# include <cppad/core/graph/cpp_graph.hpp>
+# include <cppad/local/graph/json_lexer.hpp>
 # include <cppad/local/define.hpp>
 # include <cppad/local/atomic_index.hpp>
 # include <cppad/utility/to_string.hpp>
 
-CPPAD_LIB_EXPORT void CppAD::local::json::parser(
-    const std::string&                        graph                  ,
-    std::string&                              function_name          ,
-    size_t&                                   n_dynamic_ind          ,
-    size_t&                                   n_independent          ,
-    CppAD::vector<std::string>&               atomic_name_vec        ,
-    CppAD::vector<std::string>&               string_vec             ,
-    CppAD::vector<double>&                    constant_vec           ,
-    CppAD::vector<json_op_struct>&            operator_vec           ,
-    CppAD::vector<size_t>&                    operator_arg           ,
-    CppAD::vector<size_t>&                    dependent_vec          )
+// documentation for this routine is in the file below
+# include <cppad/local/graph/json_parser.hpp>
+
+CPPAD_LIB_EXPORT void CppAD::local::graph::json_parser(
+    const std::string& json      ,
+    cpp_graph&         graph_obj )
 {   using std::string;
-    const std::string match_any_string = "";
     //
-    // atomic_name_vec
-    bool        set_null = true;
-    size_t      index_in = 0;
-    size_t      type;
-    string      name;
-    void*       ptr;
-    size_t n_atomic = CppAD::local::atomic_index<double>(
-        set_null, index_in, type, &name, ptr
-    );
-    atomic_name_vec.resize(n_atomic + 1 );
-    atomic_name_vec[0] = "";
-    set_null = false;
-    for(index_in = 1; index_in <= n_atomic; ++index_in)
-    {   CppAD::local::atomic_index<double>(
-            set_null, index_in, type, &name, ptr
-        );
-        if( type == 3 )
-            atomic_name_vec[index_in] = name;
-        else
-            atomic_name_vec[index_in] = "";
-    }
     //
-    // The values in this vector will be set while parsing op_devine_vec.
+    // match_any_string
+    const string match_any_string = "";
+    //
+    // initilize atomic_name_vec
+    graph_obj.initialize();
+    //
+    // The values in this vector will be set while parsing op_define_vec.
     // Note that the values in op_code2enum[0] are not used.
-    CppAD::vector<json_op_enum> op_code2enum(1);
+    CppAD::vector<graph_op_enum> op_code2enum(1);
     //
     // -----------------------------------------------------------------------
     // json_lexer constructor checks for { at beginning
-    CppAD::local::json::lexer json_lexer(graph);
+    CppAD::local::graph::json_lexer json_lexer(json);
     //
     // "function_name" : function_name
     json_lexer.check_next_string("function_name");
     json_lexer.check_next_char(':');
     json_lexer.check_next_string(match_any_string);
-    function_name = json_lexer.token();
+    std::string function_name = json_lexer.token();
+    graph_obj.function_name_set(function_name);
     json_lexer.set_function_name(function_name);
     json_lexer.check_next_char(',');
     //
@@ -89,7 +70,7 @@ CPPAD_LIB_EXPORT void CppAD::local::json::parser(
         json_lexer.next_non_neg_int();
 # ifndef NDEBUG
         size_t op_code = json_lexer.token2size_t();
-        assert( op_code == op_code2enum.size() );
+        CPPAD_ASSERT_UNKNOWN( op_code == op_code2enum.size() );
 # endif
         json_lexer.check_next_char(',');
         //
@@ -97,8 +78,29 @@ CPPAD_LIB_EXPORT void CppAD::local::json::parser(
         json_lexer.check_next_string("name");
         json_lexer.check_next_char(':');
         json_lexer.check_next_string(match_any_string);
-        name                 = json_lexer.token();
-        json_op_enum op_enum = op_name2enum[name];
+        string name = json_lexer.token();
+        graph_op_enum op_enum = op_name2enum[name];
+# if ! CPPAD_USE_CPLUSPLUS_2011
+        switch( op_enum )
+        {
+            case acosh_graph_op:
+            case asinh_graph_op:
+            case atanh_graph_op:
+            case erf_graph_op:
+            case erfc_graph_op:
+            case expm1_graph_op:
+            case log1p_graph_op:
+            {   string expected = "a C++98 function";
+                string found    = name + " which is a C++11 function.";
+                json_lexer.report_error(expected, found);
+            }
+            break;
+
+            default:
+            break;
+        }
+
+# endif
         //
         // op_code2enum for this op_code
         op_code2enum.push_back(op_enum);
@@ -133,46 +135,28 @@ CPPAD_LIB_EXPORT void CppAD::local::json::parser(
     json_lexer.check_next_char(':');
     //
     json_lexer.next_non_neg_int();
-    n_dynamic_ind = json_lexer.token2size_t();
+    size_t n_dynamic_ind = json_lexer.token2size_t();
+    graph_obj.n_dynamic_ind_set(n_dynamic_ind);
     //
     json_lexer.check_next_char(',');
     // -----------------------------------------------------------------------
-    // "n_independent" : n_independent ,
-    json_lexer.check_next_string("n_independent");
+    // "n_variable_ind" : n_variable_ind ,
+    json_lexer.check_next_string("n_variable_ind");
     json_lexer.check_next_char(':');
     //
     json_lexer.next_non_neg_int();
-    n_independent = json_lexer.token2size_t();
+    size_t n_variable_ind = json_lexer.token2size_t();
+    graph_obj.n_variable_ind_set(n_variable_ind);
     //
     json_lexer.check_next_char(',');
     // -----------------------------------------------------------------------
-    // "string_vec" : n_string , [ first_string, ... , last_string ] ,
-    json_lexer.check_next_string("string_vec");
-    json_lexer.check_next_char(':');
-    //
-    json_lexer.next_non_neg_int();
-    size_t n_string  = json_lexer.token2size_t();
-    string_vec.resize(n_string);
-    json_lexer.check_next_char(',');
-    //
-    json_lexer.check_next_char('[');
-    for(size_t i = 0; i < n_string; ++i)
-    {   json_lexer.check_next_string(match_any_string);
-        string_vec[i] = json_lexer.token();
-        //
-        if( i + 1 < n_string )
-            json_lexer.check_next_char(',');
-    }
-    json_lexer.check_next_char(']');
-    json_lexer.check_next_char(',');
-    // -----------------------------------------------------------------------
-    // "constant_vec": n_constant, [ first_constant, ..., last_constant ],
+    // "constant_vec": [ n_constant, [ first_constant, ..., last_constant ] ],
     json_lexer.check_next_string("constant_vec");
     json_lexer.check_next_char(':');
+    json_lexer.check_next_char('[');
     //
     json_lexer.next_non_neg_int();
     size_t n_constant = json_lexer.token2size_t();
-    constant_vec.resize(n_constant);
     //
     json_lexer.check_next_char(',');
     //
@@ -180,22 +164,22 @@ CPPAD_LIB_EXPORT void CppAD::local::json::parser(
     json_lexer.check_next_char('[');
     for(size_t i = 0; i < n_constant; ++i)
     {   json_lexer.next_float();
-        constant_vec[i] = json_lexer.token2double();
+        graph_obj.constant_vec_push_back( json_lexer.token2double() );
         //
         if( i + 1 < n_constant )
             json_lexer.check_next_char(',');
     }
     json_lexer.check_next_char(']');
+    json_lexer.check_next_char(']');
     json_lexer.check_next_char(',');
     // -----------------------------------------------------------------------
-    // "op_usage_vec": n_usage, [ first_op_usage, ..., last_op_usage ],
+    // "op_usage_vec": [ n_usage, [ first_op_usage, ..., last_op_usage ] ],
     json_lexer.check_next_string("op_usage_vec");
     json_lexer.check_next_char(':');
+    json_lexer.check_next_char('[');
     //
     json_lexer.next_non_neg_int();
     size_t n_usage = json_lexer.token2size_t();
-    operator_vec.resize(n_usage);
-    operator_arg.resize(0);
     //
     json_lexer.check_next_char(',');
     //
@@ -206,9 +190,7 @@ CPPAD_LIB_EXPORT void CppAD::local::json::parser(
         //
         // op_enum
         json_lexer.next_non_neg_int();
-        json_op_enum op_enum    = op_code2enum[ json_lexer.token2size_t() ];
-        operator_vec[i].op_enum = op_enum;
-        operator_vec[i].atomic_index = 0; // value for not an atomic function
+        graph_op_enum op_enum    = op_code2enum[ json_lexer.token2size_t() ];
         json_lexer.check_next_char(',');
         //
         size_t n_result = 1;
@@ -216,28 +198,28 @@ CPPAD_LIB_EXPORT void CppAD::local::json::parser(
         //
         // check if number of arguments is fixed
         bool fixed      = n_arg > 0;
+        size_t name_index = graph_obj.atomic_name_vec_size();
         if( ! fixed )
-        {   if( op_enum == atom_json_op )
+        {   if( op_enum == atom_graph_op )
             {   // name,
                 json_lexer.check_next_string(match_any_string);
-                name = json_lexer.token();
-                for(size_t index = 1; index < atomic_name_vec.size(); ++index)
-                {   if( atomic_name_vec[index] == name )
-                    {   if( operator_vec[i].atomic_index != 0 )
-                        {   string expected = "unique atomic function name";
-                            string found    = name;
-                            json_lexer.report_error(expected, found);
-                        }
-                        operator_vec[i].atomic_index = index;
-                    }
-                }
-                if( operator_vec[i].atomic_index == 0 )
-                {   string expected = "a valid atomic function name";
-                    string found    = name;
-                    json_lexer.report_error(expected, found);
-                }
+                string name = json_lexer.token();
                 json_lexer.check_next_char(',');
+                //
+                for(size_t index = 0; index < graph_obj.atomic_name_vec_size(); ++index)
+                {   if( graph_obj.atomic_name_vec_get(index) == name )
+                        name_index = index;
+                }
+                if( name_index == graph_obj.atomic_name_vec_size() )
+                    graph_obj.atomic_name_vec_push_back( name );
             }
+            else CPPAD_ASSERT_UNKNOWN(
+                op_enum == comp_eq_graph_op ||
+                op_enum == comp_le_graph_op ||
+                op_enum == comp_lt_graph_op ||
+                op_enum == comp_ne_graph_op ||
+                op_enum == sum_graph_op
+            );
             // n_result,
             json_lexer.next_non_neg_int();
             n_result = json_lexer.token2size_t();
@@ -249,16 +231,29 @@ CPPAD_LIB_EXPORT void CppAD::local::json::parser(
             json_lexer.check_next_char(',');
             json_lexer.check_next_char('[');
         }
-        operator_vec[i].n_result = n_result;
-        operator_vec[i].n_arg    = n_arg;
         //
-        // start_arg
-        operator_vec[i].start_arg = operator_arg.size();
+        // in the atom_graph_op case, name_index, n_result, n_arg
+        // come before first argument
+        if( op_enum == atom_graph_op )
+        {   // name_index, n_result, n_arg come before first_node
+            CPPAD_ASSERT_UNKNOWN( name_index < graph_obj.atomic_name_vec_size() );
+            graph_obj.operator_arg_push_back( name_index );
+            graph_obj.operator_arg_push_back( n_result );
+            graph_obj.operator_arg_push_back( n_arg );
+        }
+        if( op_enum == sum_graph_op )
+        {   // n_arg comes before first_node
+            graph_obj.operator_arg_push_back( n_arg );
+        }
+        // operator_vec
+        graph_op_enum op_usage;
+        op_usage = op_enum;
+        graph_obj.operator_vec_push_back( op_usage );
         for(size_t j = 0; j < n_arg; ++j)
         {   // next_arg
             json_lexer.next_non_neg_int();
             size_t argument_node = json_lexer.token2size_t();
-            operator_arg.push_back( argument_node );
+            graph_obj.operator_arg_push_back( argument_node );
             //
             // , (if not last entry)
             if( j + 1 < n_arg )
@@ -273,25 +268,27 @@ CPPAD_LIB_EXPORT void CppAD::local::json::parser(
             json_lexer.check_next_char(',');
     }
     json_lexer.check_next_char(']');
+    json_lexer.check_next_char(']');
     json_lexer.check_next_char(',');
     // -----------------------------------------------------------------------
     // "dependent_vec": [ n_dependent, [first_dependent, ..., last_dependent] ]
     json_lexer.check_next_string("dependent_vec");
     json_lexer.check_next_char(':');
+    json_lexer.check_next_char('[');
     //
     json_lexer.next_non_neg_int();
     size_t n_dependent = json_lexer.token2size_t();
-    dependent_vec.resize(n_dependent);
     json_lexer.check_next_char(',');
     //
     json_lexer.check_next_char('[');
     for(size_t i = 0; i < n_dependent; ++i)
     {   json_lexer.next_float();
-        dependent_vec[i] = json_lexer.token2size_t();
+        graph_obj.dependent_vec_push_back( json_lexer.token2size_t() );
         //
         if( i + 1 < n_dependent )
             json_lexer.check_next_char(',');
     }
+    json_lexer.check_next_char(']');
     json_lexer.check_next_char(']');
     // -----------------------------------------------------------------------
     // end of Json object

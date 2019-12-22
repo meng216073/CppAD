@@ -11,7 +11,7 @@
 # -----------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
 dnl   package   version              bug-report
-AC_INIT([cppad], [20190820], [cppad@list.coin-or.org])
+AC_INIT([cppad], [20191221], [cppad@list.coin-or.org])
 AM_SILENT_RULES([no])
 
 dnl By defalut disable maintainer mode when running configure;
@@ -372,7 +372,6 @@ fi
 dnl -------------------------------------------------------------------------
 dnl Setting that cmake finds but autotools not kept up to date on
 AC_SUBST(cppad_cxx_flags, "")
-AC_SUBST(cppad_deprecated_01,  0)
 AC_SUBST(cppad_has_colpack, 0)
 AC_SUBST(cppad_has_mkstemp, 0)
 AC_SUBST(cppad_has_tmpnam_s, 0)
@@ -729,6 +728,7 @@ AC_CONFIG_FILES([
     cppad_ipopt/example/makefile
     cppad_ipopt/speed/makefile
     cppad_ipopt/test/makefile
+    cppad_lib/makefile
     example/general/makefile
     example/abs_normal/makefile
     example/atomic_two/makefile
@@ -739,6 +739,7 @@ AC_CONFIG_FILES([
     example/sparse/makefile
     example/utility/makefile
     example/get_started/makefile
+    include/makefile
     introduction/makefile
     example/multi_thread/makefile
     example/print_for/makefile

@@ -144,6 +144,18 @@ AM_V_CXXLD = $(am__v_CXXLD_@AM_V@)
 am__v_CXXLD_ = $(am__v_CXXLD_@AM_DEFAULT_V@)
 am__v_CXXLD_0 = @echo "  CXXLD   " $@;
 am__v_CXXLD_1 = 
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+AM_V_CC = $(am__v_CC_@AM_V@)
+am__v_CC_ = $(am__v_CC_@AM_DEFAULT_V@)
+am__v_CC_0 = @echo "  CC      " $@;
+am__v_CC_1 = 
+CCLD = $(CC)
+LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
+AM_V_CCLD = $(am__v_CCLD_@AM_V@)
+am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
+am__v_CCLD_0 = @echo "  CCLD    " $@;
+am__v_CCLD_1 = 
 SOURCES = $(speed_profile_SOURCES)
 DIST_SOURCES = $(speed_profile_SOURCES)
 am__can_run_installinfo = \
@@ -274,7 +286,6 @@ cppad_boostvector = @cppad_boostvector@
 cppad_cplusplus_201100_ok = @cppad_cplusplus_201100_ok@
 cppad_cppadvector = @cppad_cppadvector@
 cppad_cxx_flags = @cppad_cxx_flags@
-cppad_deprecated_01 = @cppad_deprecated_01@
 cppad_description = @cppad_description@
 cppad_eigenvector = @cppad_eigenvector@
 cppad_has_adolc = @cppad_has_adolc@
@@ -337,7 +348,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # -----------------------------------------------------------------------------
-# CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
+# CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
 #
 # CppAD is distributed under the terms of the
 #              Eclipse Public License Version 2.0.
@@ -361,6 +372,7 @@ source_list = \
 	link_mat_mul.cpp \
 	link_ode.cpp \
 	link_poly.cpp \
+	link_sparse_hessian.hpp \
 	link_sparse_hessian.cpp \
 	link_sparse_jacobian.cpp \
 	microsoft_timer.cpp
@@ -740,6 +752,8 @@ link_poly.cpp: $(srcdir)/../src/link_poly.cpp
 	cp $(srcdir)/../src/link_poly.cpp link_poly.cpp
 link_sparse_hessian.cpp: $(srcdir)/../src/link_sparse_hessian.cpp
 	cp $(srcdir)/../src/link_sparse_hessian.cpp link_sparse_hessian.cpp
+link_sparse_hessian.hpp: $(srcdir)/../src/link_sparse_hessian.hpp
+	cp $(srcdir)/../src/link_sparse_hessian.hpp link_sparse_hessian.hpp
 link_sparse_jacobian.cpp: $(srcdir)/../src/link_sparse_jacobian.cpp
 	cp $(srcdir)/../src/link_sparse_jacobian.cpp link_sparse_jacobian.cpp
 microsoft_timer.cpp: $(srcdir)/../src/microsoft_timer.cpp

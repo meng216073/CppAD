@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------------------
-CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
+CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-19 Bradley M. Bell
 
   CppAD is distributed under the terms of the
                Eclipse Public License Version 2.0.
@@ -12,8 +12,8 @@ CppAD: C++ Algorithmic Differentiation: Copyright (C) 2003-18 Bradley M. Bell
 $begin wish_list$$
 $spell
     Subgraphs
-    Jacobians
     subgraph
+    Jacobians
     Recomputation
     optimizer
     checkpointing
@@ -21,36 +21,17 @@ $spell
     recomputed
     iterator
     Adolc
-    xml
     hpp
     CppAD
     Atan
     cppad
     tapeless
-    Retape
     jac
-    isnan
-    vx
-    Jacobian
-    const
-    Eigen
     boolofvoid
-    afun
-    hes
-    Mp
-    op
-    bool
-    vec
-    cmake
-    vcdir
-    vcvarsall
-    lic
-    tgz
-    vx
-    vy
     inline
-    Colpack
+    colpack
     azmul
+    op
 $$
 
 $section The CppAD Wish List$$
@@ -61,6 +42,21 @@ $cref research$$
 $head Purpose$$
 The items on this list are improvements and extensions to CppAD
 that are currently being considered.
+
+$head Dynamic Parameters$$
+The comparisons for dynamic parameters are not being included
+in the $cref/record_compare/Independent/record_compare/$$ is true.
+This should be fixed and included in the
+$cref/number/compare_change/number/$$ returned by
+$icode%f%.compare_change%$$.
+In addition, we will need a way to know if
+$cref/op_index/compare_change/op_index/$$ corresponds to a
+variable or dynamic parameter operator.
+
+$head Graph Operators$$
+The $cref/missing operators/graph_op_enum/Missing Operators/$$ should be
+implemented so that they can be include in conversion between $cref ADFun$$
+objects and the AD graphs; see $cref cpp_ad_graph$$, $cref json_ad_graph$$.
 
 $head Reverse Mode$$
 Reverse mode calculation of the function
@@ -79,32 +75,61 @@ reverse mode multiplications would not need to be converted to $code azmul$$
 and the function above would return $code nan$$ for the derivative value.
 This may also be faster that using $code azmul$$.
 
-
-$head inline$$
-The C++ $code inline$$ specifier is used to avoid multiple copies
-of functions (that are not templates) during the link process.
-Perhaps some of these functions should be regular functions and part
-in the $cref/cppad_lib/colpack_prefix/cppad_lib/$$ library.
-(Currently $code cppad_lib$$ only contains routines needed to us
-Colpack.)
-
 $head Atomic Examples$$
 Convert the remaining $cref/atomic_two_examples/atomic_two_example/$$
 to use the $cref atomic_three$$ interface.
 
+$comment ------------------------------------------------------------------- $$
+$head Abs-normal$$
+
+$subhead Atomic Functions$$
+The $cref abs_normal_fun$$ conversion does not handle
+atomic functions. This should be fixed.
+
+$subhead Return Functions$$
+Change the $cref abs_normal_fun$$ to return the functions
+$cref/z(x, u)/abs_normal_fun/g/z(x, u)/$$ and
+$cref/y(x, u)/abs_normal_fun/g/y(x, u)/$$ instead of
+$latex g(x, u)$$ and $latex a(x)$$.
+We can add a utility that computes $latex a(x)$$ using
+$latex z(x, u)$$, $latex a_i (x) = | z_i (x, a(x) ) |$$
+and $latex z_i$$ does not depends on $latex u_j$$ for $latex j \geq i$$.
+
+$subhead Cancellation$$
+Avoid cancellation when computing the difference in the absolute value
+function at the current point $latex \hat{x}$$ the displaced point
+$latex x = \hat{x} + \Delta x$$; i.e.,
+$latex \[
+    |z_i (x, \tilde{a}(x) ) | - |z_i (\hat{x}, a(\hat{x}) ) |
+\] $$
+
+$comment ------------------------------------------------------------------- $$
+$head cppad_lib$$
+
+$subhead Requirement$$
+Currently $code cppad_lib$$ library is only needed if one uses
+$cref/colpack/colpack_prefix/$$,
+$cref json_ad_graph$$, or
+$cref cpp_ad_graph$$.
+
+$subhead inline$$
+The C++ $code inline$$ specifier is used to avoid multiple copies
+of functions (that are not templates) during the link process.
+Perhaps some of these functions should be regular functions and part
+in the $cref/cppad_lib/colpack_prefix/cppad_lib/$$ library.
+
+$subhead Compilation Speed$$
+Perhaps complication speed when using $code AD<double>$$
+could significantly be increased by including some of it's member functions
+in the cppad_lib library.
+
+
 $comment ------------------------------------------------------------------ $$
 $head checkpoint$$
 
-$subhead Constructor$$
-Now that $cref base2ad$$ is available,
-perhaps one should pass an $cref ADFun$$ object,
-instead of an algorithm,
-to the check point constructor.
-
-
 $subhead Tapeless AD$$
 Perhaps there should be a version of the
-$cref/checkpoint/chkpoint_one/$$
+$cref chkpoint_two$$
 class that uses a tapeless AD package to compute
 the derivative values.
 This would allow for algorithms where the operations sequence
@@ -123,14 +148,13 @@ derivative values.
 This would also allow for algorithms where the operations sequence
 depends on the independent variable values.
 Perhaps (as for tapeless entry above)
-they should be passed into the constructor.
+the sparsity pattern should be passed into the constructor.
 
 $subhead Testing$$
 There should be some examples and tests for both speed and memory use
 that demonstrate that checkpointing is useful.
 
 $comment ------------------------------------------------------------------- $$
-
 $head Subgraph$$
 
 $subhead Forward Mode$$
@@ -149,38 +173,11 @@ These sparsity patterns could be made more efficient
 by using the sparsity patterns for the atomic functions.
 
 $comment ------------------------------------------------------------------- $$
-
-$head Constant$$
-There should be a $icode%f%.Constant(%i%)%$$ function,
-similar to the $cref/Parameter/seq_property/Parameter/$$ function,
-that allows one to determine which dependent variables are
-$cref/constant parameters/glossary/Parameter/Constant/$$.
-
-$comment ------------------------------------------------------------------- $$
-
 $head Element-wise Atomic Operations$$
 Add atomic functions for element-wise addition, subtraction,
 multiplication, and division.
 Where the operands are $cref/simple vectors/SimpleVector/$$
 with elements of type $codei%AD<%Base%>%$$.
-
-$head Abs-normal$$
-$list number$$
-Change the $cref abs_normal_fun$$ to return the functions
-$cref/z(x, u)/abs_normal_fun/g/z(x, u)/$$ and
-$cref/y(x, u)/abs_normal_fun/g/y(x, u)/$$ instead of
-$latex g(x, u)$$ and $latex a(x)$$.
-We can add a utility that computes $latex a(x)$$ using
-$latex z(x, u)$$, $latex a_i (x) = | z_i (x, a(x) ) |$$
-and $latex z_i$$ does not depends on $latex u_j$$ for $latex j \geq i$$.
-$lnext
-Avoid cancellation when computing the difference in the absolute value
-function at the current point $latex \hat{x}$$ the displaced point
-$latex x = \hat{x} + \Delta x$$; i.e.,
-$latex \[
-    |z_i (x, \tilde{a}(x) ) | - |z_i (\hat{x}, a(\hat{x}) ) |
-\] $$
-$lend
 
 $head check_finite$$
 $list number$$
@@ -205,7 +202,6 @@ Split the $cref/example list/ListAllExamples/$$
 into separate groups by the corresponding example subdirectory.
 
 $comment ----------------------------------------------------------------- $$
-
 $head Optimization$$
 
 $subhead Taping$$
@@ -222,10 +218,6 @@ and have the optimizer recognize when they should be used.
 that the user would use them.)
 
 $comment -------------------------------------------------------------------$$
-
-$head Compilation Speed$$
-Create a library corresponding to $code AD<double>$$ so that
-one does not need to re-compile all the header files every time.
 
 $head Base Requirements$$
 Change the $cref/Base requirements/base_require/$$ to use template
